@@ -1,0 +1,45 @@
+inherit_gem:
+  rubocop-rails_config:
+    - config/rails.yml
+
+require: rubocop-performance
+
+AllCops:
+  NewCops: enable
+
+Performance:
+  Enabled: true
+
+Rails:
+  Enabled: true
+
+Rails/Pluck:
+  Enabled: false
+
+Rails/NegateInclude:
+  Enabled: false
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: single_quotes
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Layout/LineLength:
+  Max: 80
+
+Layout/IndentationConsistency:
+  EnforcedStyle: normal
+
+Style/BlockDelimiters:
+  Enabled: true
+
+Rails/ApplicationRecord:
+  Enabled: false
+
+Rails/BelongsTo:
+  Enabled: false
+
+Rails/ApplicationController:
+  Enabled: false
