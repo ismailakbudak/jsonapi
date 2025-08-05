@@ -179,6 +179,49 @@ RSpec.describe UsersController, type: :request do
           end
         end
 
+
+        context 'on page empty' do
+          let(:params) do
+            {
+              page: { number: 3 }
+            }
+          end
+
+          it do
+            expect(response).to have_http_status(:ok)
+            expect(response_json['data'].size).to eq(0)
+            expect(response_json['data']).to eql([])
+
+            expect(response_json['meta']['pagination']).to eq(
+                                                             'current' => 3,
+                                                             'total_count' => 3,
+                                                             'total_page' => 1
+                                                           )
+            expect(response_json['links']).to eq(
+                                                'current' => query_str(params),
+                                                'first' => query_str(params, page: 1),
+                                                'prev' => query_str(params, page: 2),
+                                                'next' => nil,
+                                                'last' => '?',
+                                                )
+
+            expect(response_json).to have_link(:current)
+            expect(response_json).to have_link(:prev)
+            expect(response_json).to have_link(:first)
+            expect(response_json).to have_link(:next)
+            expect(response_json).to have_link(:last)
+
+            expect(URI.parse(response_json['links']['current']).query)
+              .to eq(CGI.unescape(params.to_query))
+
+            qry = CGI.unescape(params.deep_merge(page: { number: 2 }).to_query)
+            expect(URI.parse(response_json['links']['prev']).query).to eq(qry)
+
+            qry = CGI.unescape(params.except(:page).to_query)
+            expect(URI.parse(response_json['links']['first']).query).to eq(qry)
+          end
+        end
+
         context 'on paging beyond the last page' do
           let(:as_list) { }
           let(:params) do

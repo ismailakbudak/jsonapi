@@ -28,7 +28,7 @@ module JSONAPI
     # @return [NilClass]
     def self.add_renderer!
       ActionController::Renderers.add(:jsonapi_paginate) do |resource, options|
-        self.content_type ||= Mime[:jsonapi]
+        self.content_type ||= Mime[:json]
 
         result = {}
         JSONAPI_PAGINATE_METHODS_MAPPING.to_a[0..1].each do |opt, method_name|

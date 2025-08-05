@@ -17,17 +17,14 @@ end
 desc('Codestyle check and linter')
 RuboCop::RakeTask.new('qa:code') do |task|
   task.fail_on_error = true
-  task.patterns = [
-    'lib/**/*.rb',
-    'spec/**/*.rb'
-  ]
+  task.patterns = %w[lib/**/*.rb spec/**/*.rb]
 end
 
 desc('Run CI QA tasks')
 if ENV['RAILS_VERSION'].to_s.include?('4')
   task(qa: ['qa:docs'])
 else
-  task(qa: ['qa:docs', 'qa:code'])
+  task(qa: %w[qa:docs qa:code])
 end
 
 RSpec::Core::RakeTask.new(spec: :qa)

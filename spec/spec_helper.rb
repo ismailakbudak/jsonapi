@@ -84,9 +84,4 @@ end
 RSpec.configure do |config|
   config.include RSpecHelpers, type: :request
   config.include RSpecHelpers, type: :controller
-
-  if ::Rails::VERSION::MAJOR == 4
-    config.include Rails4RequestMethods, type: :request
-    config.include Rails4RequestMethods, type: :controller
-  end
 end
