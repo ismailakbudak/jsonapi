@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'jsonapi/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'jsonapi.rb'
+  spec.name          = 'jsonapi'
   spec.version       = JSONAPI::VERSION
   spec.authors       = ['Stas Suscov']
   spec.email         = ['stas@nerd.ro']
