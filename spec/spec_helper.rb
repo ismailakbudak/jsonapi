@@ -23,6 +23,11 @@ RSpec.configure do |config|
   config.expect_with :rspec do |c|
     c.syntax = :expect
   end
+
+  # Silence ActiveModelSerializers logs during tests
+  if defined?(ActiveModelSerializers)
+    ActiveModelSerializers.logger = Logger.new(nil)
+  end
 end
 
 module RSpecHelpers
@@ -32,7 +37,7 @@ module RSpecHelpers
   #
   # @return [Hash] the relevant content type &co
   def jsonapi_headers
-    { 'Content-Type': Mime[:jsonapi].to_s }
+    { 'Content-Type': Mime[:json].to_s }
   end
 
   # Parses and returns a deserialized JSON

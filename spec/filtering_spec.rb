@@ -53,7 +53,7 @@ RSpec.describe UsersController, type: :request do
         it do
           expect(response).to have_http_status(:ok)
           expect(response_json['data'].size).to eq(1)
-          expect(response_json['data'][0]).to have_id(third_user.id.to_s)
+          expect(response_json['data'][0]['id']).to eql(third_user.id)
         end
 
         context 'with a comma' do
@@ -68,7 +68,7 @@ RSpec.describe UsersController, type: :request do
           it do
             expect(response).to have_http_status(:ok)
             expect(response_json['data'].size).to eq(1)
-            expect(response_json['data'][0]).to have_id(third_user.id.to_s)
+            expect(response_json['data'][0]['id']).to eql(third_user.id)
           end
         end
       end
@@ -81,7 +81,7 @@ RSpec.describe UsersController, type: :request do
         it do
           expect(response).to have_http_status(:ok)
           expect(response_json['data'].size).to eq(3)
-          expect(response_json['data'][0]).to have_id(second_user.id.to_s)
+          expect(response_json['data'][0]['id']).to eql(second_user.id)
         end
       end
 
@@ -93,7 +93,7 @@ RSpec.describe UsersController, type: :request do
         it do
           expect(response).to have_http_status(:ok)
           expect(response_json['data'].size).to eq(3)
-          expect(response_json['data'][0]).to have_id(second_user.id.to_s)
+          expect(response_json['data'][0]['id']).to eql(second_user.id)
         end
       end
     end

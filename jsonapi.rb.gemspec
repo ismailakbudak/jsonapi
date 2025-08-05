@@ -20,9 +20,9 @@ Gem::Specification.new do |spec|
   spec.files        += %w(LICENSE.txt README.md)
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'jsonapi-serializer'
   spec.add_dependency 'ransack'
   spec.add_dependency 'rack'
+  spec.add_dependency 'active_model_serializers'
 
   spec.add_development_dependency 'bundler'
   spec.add_development_dependency 'rails', ENV['RAILS_VERSION']

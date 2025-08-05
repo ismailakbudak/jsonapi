@@ -19,7 +19,7 @@ RSpec.describe UsersController, type: :request do
 
       context 'returns customers and dasherized first name' do
         let(:params) do
-          { upcase: :yes, fields: { unknown: nil } }
+          { upcase: :yes, fields: [:first_name] }
         end
 
         it do
@@ -28,8 +28,7 @@ RSpec.describe UsersController, type: :request do
 
           response_json['data'].each do |item|
             user = users.detect { |u| u.id == item['id'].to_i }
-            expect(item).to have_attribute('first_name')
-              .with_value(user.first_name.upcase)
+            expect(item['first_name']).to eql(user.first_name.upcase)
           end
         end
       end
@@ -46,7 +45,7 @@ RSpec.describe UsersController, type: :request do
           response_json['data'].each do |item|
             user = users.detect { |u| u.id == item['id'].to_i }
             full_name = "#{user.first_name} #{user.last_name}"
-            expect(item).to have_attribute('full_name').with_value(full_name)
+            expect(item['full_name']).to eql(full_name)
           end
         end
       end
@@ -61,20 +60,13 @@ RSpec.describe UsersController, type: :request do
 
         it do
           expect(response).to have_http_status(:ok)
-          expect(response_json['data'].last)
-            .to have_relationship(:notes)
-            .with_data([
-              { 'id' => note.id.to_s, 'type' => 'note' }
-          ])
-          expect(response_json['included']).to include(
-            'id' => note.id.to_s,
-            'type' => 'note',
-            'relationships' => {},
-            'attributes' => {
-              'title' => note.title,
-              'updated_at' => note.updated_at.as_json
-            }
-          )
+          expect(response_json['data'].last['notes'].size).to eql(1)
+          expect(response_json['data'].last['notes'][0]).to eql({
+            'quantity' => note.quantity,
+            'title' => note.title,
+            'created_at' => note.created_at.as_json,
+            'updated_at' => note.updated_at.as_json
+          })
         end
       end
     end

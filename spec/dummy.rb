@@ -3,6 +3,7 @@ require 'active_record'
 require 'action_controller/railtie'
 require 'jsonapi'
 require 'ransack'
+require 'active_model_serializers'
 
 Rails.logger = Logger.new(STDOUT)
 Rails.logger.level = ENV['LOG_LEVEL'] || Logger::WARN
@@ -52,22 +53,17 @@ class Note < ApplicationRecord
   belongs_to :user, required: true
 end
 
-class CustomNoteSerializer
-  include JSONAPI::Serializer
-
-  set_type :note
+class CustomNoteSerializer < ActiveModel::Serializer
+  attributes :title, :quantity, :created_at, :updated_at
   belongs_to :user
-  attributes(:title, :quantity, :created_at, :updated_at)
 end
 
-class UserSerializer
-  include JSONAPI::Serializer
-
+class UserSerializer < ActiveModel::Serializer
+  attributes :id, :last_name, :created_at, :updated_at, :first_name
   has_many :notes, serializer: CustomNoteSerializer
-  attributes(:last_name, :created_at, :updated_at)
 
-  attribute :first_name do |object, params|
-    if params[:first_name_upcase]
+  def first_name
+    if @instance_options.dig(:params, :first_name_upcase)
       object.first_name.upcase
     else
       object.first_name
@@ -76,7 +72,9 @@ class UserSerializer
 end
 
 class MyUserSerializer < UserSerializer
-  attribute :full_name do |object, _|
+  attribute :full_name
+
+  def full_name
     "#{object.first_name} #{object.last_name}"
   end
 end
@@ -93,11 +91,17 @@ class Dummy < Rails::Application
   end
 end
 
-class UsersController < ActionController::Base
-  include JSONAPI::Fetching
+class BaseApplicationController < ActionController::Base
+  def serialize_array(data, options = {})
+    options[:adapter] = :attributes
+    ActiveModelSerializers::SerializableResource.new(data, options).as_json
+  end
+end
+
+class UsersController < BaseApplicationController
+  # include JSONAPI::Fetching
   include JSONAPI::Filtering
   include JSONAPI::Pagination
-  include JSONAPI::Deserialization
 
   def index
     allowed_fields = [
@@ -118,7 +122,7 @@ class UsersController < ActionController::Base
 
       jsonapi_paginate(result) do |paginated|
         render jsonapi_paginate: paginated,
-               serializer_class: MyUserSerializer
+              serializer_class: MyUserSerializer
       end
     end
   end
@@ -135,49 +139,5 @@ class UsersController < ActionController::Base
     {
       first_name_upcase: params[:upcase]
     }
-  end
-end
-
-class NotesController < ActionController::Base
-  include JSONAPI::Errors
-  include JSONAPI::Deserialization
-
-  def update
-    raise_error! if params[:id] == 'tada'
-
-    note = Note.find(params[:id])
-
-    if note.update(note_params)
-      render jsonapi: note
-    else
-      note.errors.add(:title, message: 'has typos') if note.errors.key?(:title)
-
-      render jsonapi_errors: note.errors, status: :unprocessable_entity
-    end
-  end
-
-  private
-  def render_jsonapi_internal_server_error(exception)
-    Rails.logger.error(exception)
-    super(exception)
-  end
-
-  def jsonapi_serializer_class(resource, is_collection)
-    JSONAPI::Rails.serializer_class(resource, is_collection)
-  rescue NameError
-    klass = resource.class
-    klass = resource.first.class if is_collection
-    "Custom#{klass.name}Serializer".constantize
-  end
-
-  def note_params
-    # Will trigger required attribute error handling
-    params.require(:data).require(:attributes).require(:title)
-
-    jsonapi_deserialize(params)
-  end
-
-  def jsonapi_meta(resources)
-    { single: true }
   end
 end

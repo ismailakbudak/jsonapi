@@ -49,9 +49,9 @@ RSpec.describe UsersController, type: :request do
         it do
           expect(response).to have_http_status(:ok)
           expect(response_json['data'].size).to eq(3)
-          expect(response_json['data'][0]).to have_id(third_user.id.to_s)
-          expect(response_json['data'][1]).to have_id(second_user.id.to_s)
-          expect(response_json['data'][2]).to have_id(first_user.id.to_s)
+          expect(response_json['data'][0]['id']).to eql(third_user.id)
+          expect(response_json['data'][1]['id']).to eql(second_user.id)
+          expect(response_json['data'][2]['id']).to eql(first_user.id)
 
           expect(response_json).to have_link('current')
           expect(response_json).to have_link(:prev)
@@ -79,14 +79,13 @@ RSpec.describe UsersController, type: :request do
             it 'should exclude' do
               expect(response).to have_http_status(:ok)
               expect(response_json['data'].size).to eq(1)
-              expect(response_json['data'][0]).to have_id(second_user.id.to_s)
+              expect(response_json['data'][0]['id']).to eql(second_user.id)
 
               expect(response_json['meta']['pagination']).to eq(
                 'current' => 2,
                 'total_count' => 3,
                 'total_page' => 3
               )
-              pp response_json['links']
               expect(response_json['links']).to eq(
                 'current' => query_str(params),
                 'first' => query_str(params, page: 1),
@@ -100,7 +99,7 @@ RSpec.describe UsersController, type: :request do
           it do
             expect(response).to have_http_status(:ok)
             expect(response_json['data'].size).to eq(1)
-            expect(response_json['data'][0]).to have_id(second_user.id.to_s)
+            expect(response_json['data'][0]['id']).to eql(second_user.id)
 
             expect(response_json['meta']['pagination']).to eq(
               'current' => 2,
@@ -256,7 +255,7 @@ RSpec.describe UsersController, type: :request do
           it do
             expect(response).to have_http_status(:ok)
             expect(response_json['data'].size).to eq(1)
-            expect(response_json['data'][0]).to have_id(third_user.id.to_s)
+            expect(response_json['data'][0]['id']).to eql(third_user.id)
 
             expect(response_json['meta']['pagination']).to eq(
               'current' => 1,
