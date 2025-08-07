@@ -42,33 +42,7 @@ module JSONAPI
         many = JSONAPI::RailsApp.is_collection?(resource, options[:is_collection])
         resource = [ resource ] unless many
 
-        return JSONAPI::ErrorSerializer.new(resource, options).to_json unless resource.is_a?(ActiveModel::Errors)
-
-        errors = []
-        model = resource.instance_variable_get("@base")
-
-        if options[:serializer_class]
-          model_serializer = options[:serializer_class]
-        else
-          model_serializer = JSONAPI::RailsApp.serializer_class(model, false)
-        end
-
-        details = {}
-        resource.map do |error|
-          attr = error.attribute
-          details[attr] ||= []
-          details[attr] << error.detail.merge(message: error.message)
-        end
-
-        details.each do |error_key, error_hashes|
-          error_hashes.each do |error_hash|
-            errors << [ error_key, error_hash ]
-          end
-        end
-
-        JSONAPI::ErrorSerializer.new(
-          errors, params: { model: model, model_serializer: model_serializer }
-        ).to_json
+        JSONAPI::ErrorSerializer.new(resource, options).to_json
       end
     end
 
@@ -108,9 +82,10 @@ module JSONAPI
       ActionController::Renderers.add(:jsonapi) do |resource, options|
         self.content_type ||= Mime[:json]
 
+        result = {}
         JSONAPI_METHODS_MAPPING.to_a[0..0].each do |opt, method_name|
           next unless respond_to?(method_name, true)
-          options[opt] ||= send(method_name, resource)
+          result[opt] ||= send(method_name, resource)
         end
 
         # If it's an empty collection, return it directly.
@@ -126,7 +101,16 @@ module JSONAPI
           serializer_class = JSONAPI::RailsApp.serializer_class(resource, many)
         end
 
-        serializer_class.new(resource, options).to_json
+        # Use Active Model Serializers properly with fallback
+        if many
+          options[:adapter] = :attributes
+          options[:each_serializer] = serializer_class
+          data = ActiveModelSerializers::SerializableResource.new(resource, options).as_json
+        else
+          data = serializer_class.new(resource).as_json
+        end
+        result[:data] = data
+        result.to_json
       end
     end
 

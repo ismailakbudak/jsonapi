@@ -14,17 +14,17 @@ module JSONAPI
         rescue_from(
           StandardError,
           with: :render_jsonapi_internal_server_error
-        ) unless defined?(::Rails) && ::Rails.env.test?
+        )
 
         rescue_from(
           ActiveRecord::RecordNotFound,
           with: :render_jsonapi_not_found
-        ) if defined?(ActiveRecord::RecordNotFound)
+        )
 
         rescue_from(
           ActionController::ParameterMissing,
           with: :render_jsonapi_unprocessable_entity
-        ) if defined?(ActionController::ParameterMissing)
+        )
       end
     end
 
@@ -34,7 +34,12 @@ module JSONAPI
       # @param exception [Exception] instance to handle
       # @return [String] JSONAPI error response
       def render_jsonapi_internal_server_error(exception)
-        error = { status: "500", title: Rack::Utils::HTTP_STATUS_CODES[500] }
+        error = {
+          status: "500",
+          key: "internal_server_error",
+          title: Rack::Utils::HTTP_STATUS_CODES[500],
+          detail: exception.message
+        }
         render jsonapi_errors: [ error ], status: :internal_server_error
       end
 
@@ -43,7 +48,12 @@ module JSONAPI
       # @param exception [Exception] instance to handle
       # @return [String] JSONAPI error response
       def render_jsonapi_not_found(exception)
-        error = { status: "404", title: Rack::Utils::HTTP_STATUS_CODES[404] }
+        error = {
+          status: "404",
+          key: "not_found",
+          title: Rack::Utils::HTTP_STATUS_CODES[404],
+          detail: "Resource not found"
+        }
         render jsonapi_errors: [ error ], status: :not_found
       end
 
@@ -52,19 +62,14 @@ module JSONAPI
       # @param exception [Exception] instance to handle
       # @return [String] JSONAPI error response
       def render_jsonapi_unprocessable_entity(exception)
-        source = { pointer: "" }
-
-        if !%w[data attributes relationships].include?(exception.param.to_s)
-          source[:pointer] = "/data/attributes/#{exception.param}"
-        end
-
         error = {
           status: "422",
+          key: "unprocessable_entity",
           title: Rack::Utils::HTTP_STATUS_CODES[422],
-          source: source
+          detail: "Required parameter missing or invalid",
         }
 
-        render jsonapi_errors: [ error ], status: :unprocessable_entity
+        render jsonapi_errors: [ error ], status: :unprocessable_content
       end
   end
 end

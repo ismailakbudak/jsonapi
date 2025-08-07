@@ -54,7 +54,7 @@ class Note < ApplicationRecord
 end
 
 class CustomNoteSerializer < ActiveModel::Serializer
-  attributes :title, :quantity, :created_at, :updated_at
+  attributes :id, :title, :quantity, :created_at, :updated_at
   belongs_to :user
 end
 
@@ -151,7 +151,8 @@ class NotesController < ActionController::Base
     note = Note.find(params[:id])
 
     if note.update(note_params)
-      render jsonapi: note
+      render jsonapi: note,
+             serializer_class: CustomNoteSerializer
     else
       note.errors.add(:title, message: 'has typos') if note.errors.key?(:title)
 
@@ -161,17 +162,8 @@ class NotesController < ActionController::Base
 
   private
 
-    def jsonapi_serializer_class(resource, is_collection)
-      JSONAPI::RailsApp.serializer_class(resource, is_collection)
-    rescue NameError
-      klass = resource.class
-      klass = resource.first.class if is_collection
-      "Custom#{klass.name}Serializer".constantize
-    end
-
     def note_params
-      # Will trigger required attribute error handling
-      params.require(:data).require(:attributes).require(:title)
+      params.require(:note).permit(:title, :user_id, :quantity, :created_at)
     end
 
     def jsonapi_meta(resources)

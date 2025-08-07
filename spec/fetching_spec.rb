@@ -62,6 +62,7 @@ RSpec.describe UsersController, type: :request do
           expect(response).to have_http_status(:ok)
           expect(response_json['data'].last['notes'].size).to eql(1)
           expect(response_json['data'].last['notes'][0]).to eql({
+            'id' => note.id,
             'quantity' => note.quantity,
             'title' => note.title,
             'created_at' => note.created_at.as_json,

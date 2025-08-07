@@ -1,4 +1,5 @@
 require "jsonapi/errors"
+require "jsonapi/error_serializer"
 # require 'jsonapi/fetching'
 require "jsonapi/filtering"
 require "jsonapi/pagination"
