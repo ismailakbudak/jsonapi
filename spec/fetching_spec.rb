@@ -13,13 +13,13 @@ RSpec.describe UsersController, type: :request do
       let(:first_user) { create_user }
       let(:second_user) { create_user }
       let(:third_user) { create_note.user }
-      let(:users) { [first_user, second_user, third_user] }
+      let(:users) { [ first_user, second_user, third_user ] }
       let(:user) { users.last }
       let(:note) { third_user.notes.first }
 
       context 'returns customers and dasherized first name' do
         let(:params) do
-          { upcase: :yes, fields: [:first_name] }
+          { upcase: :yes, fields: [ :first_name ] }
         end
 
         it do

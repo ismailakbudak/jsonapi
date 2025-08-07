@@ -1,5 +1,5 @@
-require 'ransack/predicate'
-require_relative 'patches'
+require "ransack/predicate"
+require_relative "patches"
 
 # Filtering and sorting support
 module JSONAPI
@@ -18,7 +18,7 @@ module JSONAPI
         predicates << Ransack::Predicate.named(predicate)
       end
 
-      [field_name.split(/_and_|_or_/), predicates.reverse]
+      [ field_name.split(/_and_|_or_/), predicates.reverse ]
     end
 
     private
@@ -59,7 +59,7 @@ module JSONAPI
         wants_array = predicates.any? && predicates.map(&:wants_array).any?
 
         if to_filter.is_a?(String) && wants_array
-          to_filter = to_filter.split(',')
+          to_filter = to_filter.split(",")
         end
 
         if predicates.any? && (field_names - allowed_fields).empty?
@@ -77,14 +77,14 @@ module JSONAPI
     # @return [Hash] to be passed to [ActiveRecord::Base#order]
     def jsonapi_sort_params(allowed_fields, options = {})
       filtered = []
-      requested = params[:sort].to_s.split(',')
+      requested = params[:sort].to_s.split(",")
 
       requested.each do |requested_field|
-        if requested_field.to_s.start_with?('-')
-          dir = 'desc'
+        if requested_field.to_s.start_with?("-")
+          dir = "desc"
           requested_field = requested_field[1..-1]
         else
-          dir = 'asc'
+          dir = "asc"
         end
 
         field_names, predicates = JSONAPI::Filtering
@@ -94,7 +94,7 @@ module JSONAPI
         next if !options[:sort_with_expressions] && predicates.any?
 
         # Convert to strings instead of hashes to allow joined table columns.
-        filtered << [requested_field, dir].join(' ')
+        filtered << [ requested_field, dir ].join(" ")
       end
 
       filtered

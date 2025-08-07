@@ -22,7 +22,7 @@ end
 
 desc('Run CI QA tasks')
 if ENV['RAILS_VERSION'].to_s.include?('4')
-  task(qa: ['qa:docs'])
+  task(qa: [ 'qa:docs' ])
 else
   task(qa: %w[qa:docs qa:code])
 end

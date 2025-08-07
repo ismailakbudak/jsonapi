@@ -1,4 +1,4 @@
-require 'ostruct'
+require "ostruct"
 
 # Rails integration
 module JSONAPI

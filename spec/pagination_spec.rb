@@ -22,7 +22,7 @@ RSpec.describe UsersController, type: :request do
           'pagination' => {
             'current' => 1,
             'total_page' => 1,
-            'total_count' => 0,
+            'total_count' => 0
           }
         )
     end
@@ -42,7 +42,7 @@ RSpec.describe UsersController, type: :request do
       let(:first_user) { create_user }
       let(:second_user) { create_user }
       let(:third_user) { create_user }
-      let(:users) { [first_user, second_user, third_user] }
+      let(:users) { [ first_user, second_user, third_user ] }
       let(:user) { users.last }
 
       context 'returns users with pagination links' do

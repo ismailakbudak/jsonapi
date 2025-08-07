@@ -70,7 +70,7 @@ module RSpecHelpers
 end
 
 module Rails4RequestMethods
-  [:get, :post, :put, :delete].each do |method_name|
+  [ :get, :post, :put, :delete ].each do |method_name|
     define_method(method_name) do |path, named_args|
       super(
         path,

@@ -6,8 +6,8 @@ require 'jsonapi/version'
 Gem::Specification.new do |spec|
   spec.name          = 'jsonapi'
   spec.version       = JSONAPI::VERSION
-  spec.authors       = ['Stas Suscov']
-  spec.email         = ['stas@nerd.ro']
+  spec.authors       = [ 'Stas Suscov' ]
+  spec.email         = [ 'stas@nerd.ro' ]
 
   spec.summary       = 'So you say you need JSON:API support in your API...'
   spec.description   = (
@@ -19,8 +19,8 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = '>= 3.3.0'
 
   spec.files         = Dir.glob('{lib,spec}/**/*', File::FNM_DOTMATCH)
-  spec.files        += %w(LICENSE.txt README.md)
-  spec.require_paths = ['lib']
+  spec.files        += %w[LICENSE.txt README.md]
+  spec.require_paths = [ 'lib' ]
 
   spec.add_dependency 'ransack', '~> 4.2'
   spec.add_dependency 'rack', '~> 3.1'

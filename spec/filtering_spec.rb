@@ -6,7 +6,7 @@ RSpec.describe UsersController, type: :request do
       it 'extracts ANDs' do
         attributes, predicates = JSONAPI::Filtering
           .extract_attributes_and_predicates('attr1_and_attr2_eq')
-        expect(attributes).to eq(['attr1', 'attr2'])
+        expect(attributes).to eq([ 'attr1', 'attr2' ])
         expect(predicates.size).to eq(1)
         expect(predicates[0].name).to eq('eq')
       end
@@ -16,7 +16,7 @@ RSpec.describe UsersController, type: :request do
       it 'extracts in order' do
         attributes, predicates = JSONAPI::Filtering
           .extract_attributes_and_predicates('attr1_sum_eq')
-        expect(attributes).to eq(['attr1'])
+        expect(attributes).to eq([ 'attr1' ])
         expect(predicates.size).to eq(2)
         expect(predicates[0].name).to eq('sum')
         expect(predicates[1].name).to eq('eq')
@@ -36,7 +36,7 @@ RSpec.describe UsersController, type: :request do
       let(:first_user) { create_user }
       let(:second_user) { create_note.user }
       let(:third_user) { create_user }
-      let(:users) { [first_user, second_user, third_user] }
+      let(:users) { [ first_user, second_user, third_user ] }
       let(:user) { users.last }
 
       context 'returns filtered users' do

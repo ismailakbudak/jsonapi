@@ -1,4 +1,4 @@
-require 'ransack'
+require "ransack"
 
 Ransack.configure do |config|
   # Raise errors if a query contains an unknown predicate or attribute.
@@ -8,27 +8,27 @@ Ransack.configure do |config|
   # Enable expressions
   # See: https://www.rubydoc.info/github/rails/rails/Arel/Expressions
   config.add_predicate(
-    'count', arel_predicate: 'count',
+    "count", arel_predicate: "count",
     validator: ->(_) { true }, compounds: false
   )
   config.add_predicate(
-    'count_distinct', arel_predicate: 'count',
+    "count_distinct", arel_predicate: "count",
     validator: ->(_) { true }, formatter: ->(_) { true }, compounds: false
   )
   config.add_predicate(
-    'sum', arel_predicate: 'sum',
+    "sum", arel_predicate: "sum",
     validator: ->(v) { true }, compounds: false
   )
   config.add_predicate(
-    'avg', arel_predicate: 'average',
+    "avg", arel_predicate: "average",
     validator: ->(v) { true }, compounds: false
   )
   config.add_predicate(
-    'min', arel_predicate: 'minimum',
+    "min", arel_predicate: "minimum",
     validator: ->(v) { true }, compounds: false
   )
   config.add_predicate(
-    'max', arel_predicate: 'maximum',
+    "max", arel_predicate: "maximum",
     validator: ->(v) { true }, compounds: false
   )
 end

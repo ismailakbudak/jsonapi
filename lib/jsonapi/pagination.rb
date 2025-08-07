@@ -3,7 +3,7 @@ module JSONAPI
   module Pagination
     private
     # Default number of items per page.
-    JSONAPI_PAGE_SIZE = ENV.fetch('PAGINATION_LIMIT') { 30 }
+    JSONAPI_PAGE_SIZE = ENV.fetch("PAGINATION_LIMIT") { 30 }
     # Default number of items per page.
     PAGINATION_IGNORE_KEYS = %i[total_count total_page]
 
@@ -50,7 +50,7 @@ module JSONAPI
       ).as_json.with_indifferent_access
 
       original_params[:page] = original_params[:page].dup || {}
-      original_url = '?'
+      original_url = "?"
 
       pagination.each do |page_name, number|
         next if PAGINATION_IGNORE_KEYS.include?(page_name)
@@ -98,7 +98,7 @@ module JSONAPI
         total ||= resources.size
       end
 
-      last_page = [1, (total.to_f / limit).ceil].max
+      last_page = [ 1, (total.to_f / limit).ceil ].max
 
       numbers[:first] = 1
       numbers[:last] = last_page
@@ -133,9 +133,9 @@ module JSONAPI
     def jsonapi_pagination_params
       pagination = params[:page].try(:slice, :number, :size) || {}
       per_page = jsonapi_page_size(pagination)
-      num = [1, pagination[:number].to_f.to_i].max
+      num = [ 1, pagination[:number].to_f.to_i ].max
 
-      [(num - 1) * per_page, per_page, num]
+      [ (num - 1) * per_page, per_page, num ]
     end
 
     # Retrieves the default page size
@@ -161,7 +161,7 @@ module JSONAPI
     def jsonapi_path_parameters
       return request.path_parameters if request.respond_to?(:path_parameters)
 
-      request.send(:parse_query, request.query_string, '&;')
+      request.send(:parse_query, request.query_string, "&;")
     end
   end
 end

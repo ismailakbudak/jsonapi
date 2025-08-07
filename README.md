@@ -2,52 +2,19 @@
 
 [![Build Status](https://travis-ci.org/stas/jsonapi.rb.svg?branch=master)](https://travis-ci.org/stas/jsonapi.rb)
 
-So you say you need [JSON:API](https://jsonapi.org/) support in your API...
+A modern Ruby gem for building [JSON:API](https://jsonapi.org/) compliant APIs with Rails 8+ and Ruby 3.3+.
 
-> - hey how did your hackathon go?
-> - not too bad, we got Babel set up
-> - yep…
-> - yep.
->
->— [I Am Devloper](https://twitter.com/iamdevloper/status/787969734918668289)
+> Building JSON:API shouldn't be rocket science. This gem provides simple, powerful tools to get you up and running quickly.
 
-Here are some _codes_ to help you build your next JSON:API compliable application
-easier and faster.
+## Features
 
-## But why?
+JSONAPI.rb offers a collection of lightweight modules that integrate seamlessly with your Rails controllers:
 
-It's quite a hassle to setup a Ruby (Rails) web application to use and follow
-the JSON:API specifications.
-
-The idea is simple, JSONAPI.rb offers a bunch of modules/mixins/glue,
-add them to your controllers, call some methods, _profit_!
-
-Main goals:
- * No _magic_ please
- * No DSLs please
- * Less code, less maintenance
- * Good docs and test coverage
- * Keep it up-to-date (or at least tell people this is for _grabs_)
-
-The available features include:
-
- * object serialization (powered by JSON:API Serializer, was `fast_jsonapi`)
- * [error handling](https://jsonapi.org/format/#errors) (parameters,
-   validation, generic errors)
- * fetching of the data (support for
-   [includes](https://jsonapi.org/format/#fetching-includes) and
-   [sparse fields](https://jsonapi.org/format/#fetching-sparse-fieldsets))
- * [filtering](https://jsonapi.org/format/#fetching-filtering) and
-   [sorting](https://jsonapi.org/format/#fetching-sorting) of the data
-   (powered by Ransack)
- * [pagination](https://jsonapi.org/format/#fetching-pagination) support
-
-## But how?
-
-Mainly by leveraging [JSON:API Serializer](https://github.com/jsonapi-serializer/jsonapi-serializer)
-and [Ransack](https://github.com/activerecord-hackery/ransack).
-
-Thanks to everyone who worked on these amazing projects!
+* **Object serialization** - Powered by Active Model Serializers
+* **Error handling** - JSON:API compliant [error responses](https://jsonapi.org/format/#errors) for parameters, validation, and generic errors
+* **Fetching** - Support for [includes](https://jsonapi.org/format/#fetching-includes) and [sparse fields](https://jsonapi.org/format/#fetching-sparse-fieldsets)
+* **Filtering & Sorting** - Advanced [filtering](https://jsonapi.org/format/#fetching-filtering) and [sorting](https://jsonapi.org/format/#fetching-sorting) powered by Ransack
+* **Pagination** - Built-in [pagination](https://jsonapi.org/format/#fetching-pagination) support with links and metadata
 
 ## Installation
 
@@ -58,339 +25,282 @@ Thanks to everyone who worked on these amazing projects!
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'jsonapi.rb'
+gem "jsonapi.rb"
 ```
 
 And then execute:
 
-    $ bundle
+    $ bundle install
 
-Or install it yourself as:
+## Quick Start
 
-    $ gem install jsonapi.rb
+### 1. Enable Rails Integration
 
-## Usage
-
- * [Object serialization](#object-serialization)
- * [Collection meta](#collection-meta)
- * [Error handling](#error-handling)
- * [Includes and sparse fields](#includes-and-sparse-fields)
- * [Filtering and sorting](#filtering-and-sorting)
-   * [Sorting using expressions](#sorting-using-expressions)
- * [Pagination](#pagination)
- * [Deserialization](#deserialization)
-
----
-
-To enable the support for Rails, add this to an initializer:
+Add this to an initializer:
 
 ```ruby
 # config/initializers/jsonapi.rb
-require 'jsonapi'
+require "jsonapi"
 
 JSONAPI::RailsApp.install!
 ```
 
-This will register the mime type and the `jsonapi` and `jsonapi_errors`
-renderers.
+This registers the JSON:API media type and renderers.
 
-### Object serialization
-
-The `jsonapi` renderer will try to guess and resolve the serializer class based
-on the object class, and if it is a collection, based on the first item in the
-collection.
-
-The naming scheme follows the `ModuleName::ClassNameSerializer` for an instance
-of the `ModuleName::ClassName`.
-
-Please follow the
-[JSON:API Serializer guide](https://github.com/jsonapi-serializer/jsonapi-serializer#serializer-definition)
-on how to define a serializer.
-
-To provide a different naming scheme use `serializer_class` parameter or implement the `jsonapi_serializer_class`
-method in your resource or application controller.
-
-Here's an example for `serializer_class` parameter:
-```ruby
-class CustomNamingController < ActionController::Base
-   def index
-      render jsonapi: Model.all,
-             serializer_class: MySerializer
-   end
-end
-```
-
-Here's an example for `jsonapi_serializer_class` method:
-```ruby
-class CustomNamingController < ActionController::Base
-
-  # ...
-
-  private
-
-  def jsonapi_serializer_class(resource, is_collection)
-    JSONAPI::RailsApp.serializer_class(resource, is_collection)
-  rescue NameError
-    # your serializer class naming implementation
-  end
-end
-```
-
-To provide extra parameters to the serializer,
-implement the `jsonapi_serializer_params` method.
-
-Here's an example:
-```ruby
-class CustomSerializerParamsController < ActionController::Base
-
-  # ...
-
-  private
-
-  def jsonapi_serializer_params
-    {
-      first_name_upcase: params[:upcase].present?
-    }
-  end
-end
-```
-
-#### Collection meta
-
-To provide meta information for a collection, provide the `jsonapi_meta`
-controller method.
-
-Here's an example:
+### 2. Basic Usage
 
 ```ruby
-class MyController < ActionController::Base
+class UsersController < ApplicationController
+  include JSONAPI::Filtering
+  include JSONAPI::Pagination
+
   def index
-    render jsonapi: Model.all
-  end
-
-  private
-
-  def jsonapi_meta(resources)
-    { total: resources.count } if resources.respond_to?(:count)
-  end
-end
-```
-
-### Error handling
-
-`JSONAPI::Errors` provides a basic error handling. It will generate a valid
-error response on exceptions from strong parameters, on generic errors or
-when a record is not found.
-
-To render the validation errors, just pass it to the error renderer.
-
-To use an exception notifier, overwrite the
-`render_jsonapi_internal_server_error` method in your controller.
-
-Here's an example:
-
-```ruby
-class MyController < ActionController::Base
-  include JSONAPI::Errors
-
-  def update
-    record = Model.find(params[:id])
-
-    if record.update(params.require(:data).require(:attributes).permit!)
-      render jsonapi: record
-    else
-      render jsonapi_errors: record.errors, status: :unprocessable_entity
+    allowed_fields = [ :first_name, :last_name, :created_at ]
+    
+    jsonapi_filter(User.all, allowed_fields) do |filtered|
+      jsonapi_paginate(filtered.result) do |paginated|
+        render jsonapi_paginate: paginated
+      end
     end
   end
 
-  private
-
-  def render_jsonapi_internal_server_error(exception)
-    # Call your exception notifier here. Example:
-    # Raven.capture_exception(exception)
-    super(exception)
+  def show
+    user = User.find(params[:id])
+    render jsonapi: user
   end
 end
 ```
 
-### _Includes_ and sparse fields
-
-`JSONAPI::Fetching` provides support on inclusion of related resources and
-serialization of only specific fields.
-
-Here's an example:
+### 3. Create Serializers
 
 ```ruby
-class MyController < ActionController::Base
-  include JSONAPI::Fetching
-
-  def index
-    render jsonapi: Model.all
-  end
-
-  private
-
-  # Overwrite/whitelist the includes
-  def jsonapi_include
-    super & ['wanted_attribute']
-  end
+class UserSerializer < ActiveModel::Serializer
+  attributes :id, :first_name, :last_name, :email, :created_at, :updated_at
+  
+  has_many :posts
 end
 ```
 
-### Filtering and sorting
+## Core Modules
 
-`JSONAPI::Filtering` uses the power of
-[Ransack](https://github.com/activerecord-hackery/ransack#search-matchers)
-to filter and sort over a collection of records.
-The support is pretty extended and covers also relationships and composite
-matchers.
+### JSONAPI::Filtering
 
-Here's an example:
+Provides powerful filtering and sorting using Ransack:
 
 ```ruby
-class MyController < ActionController::Base
+class UsersController < ApplicationController
   include JSONAPI::Filtering
 
   def index
-    allowed = [:model_attr, :relationship_attr]
-
-    jsonapi_filter(Model.all, allowed) do |filtered|
+    allowed_fields = [ :first_name, :last_name, :email, :posts_title ]
+    
+    jsonapi_filter(User.all, allowed_fields) do |filtered|
       render jsonapi: filtered.result
     end
   end
 end
 ```
 
-This allows you to run queries like:
-
+**Example requests:**
 ```bash
-$ curl -X GET \
-  /api/resources?filter[model_attr_or_relationship_attr_cont_any]=value,name\
-  &sort=-model_attr,relationship_attr
+# Filter by first name containing "John"
+GET /users?filter[first_name_cont]=John
+
+# Sort by last name descending, then first name ascending  
+GET /users?sort=-last_name,first_name
+
+# Complex filtering with relationships
+GET /users?filter[posts_title_matches_any]=Ruby,Rails&sort=-created_at
 ```
 
-#### Sorting using expressions
+#### Sorting with Expressions
 
-You can use basic aggregations like `min`, `max`, `avg`, `sum` and `count`
-when sorting. This is an optional feature since SQL aggregations require
-grouping. To enable expressions along with filters, use the option flags:
+Enable aggregation expressions for advanced sorting:
 
 ```ruby
-options = { sort_with_expressions: true }
-jsonapi_filter(User.all, allowed_fields, options) do |filtered|
-  render jsonapi: result.group('id').to_a
+def index
+  allowed_fields = [ :first_name, :posts_count ]
+  options = { sort_with_expressions: true }
+  
+  jsonapi_filter(User.joins(:posts), allowed_fields, options) do |filtered|
+    render jsonapi: filtered.result.group("users.id")
+  end
 end
 ```
 
-This allows you to run queries like:
-
 ```bash
-$ curl -X GET /api/resources?sort=-model_attr_sum
+# Sort by post count
+GET /users?sort=-posts_count_sum
 ```
 
-### Pagination
+### JSONAPI::Pagination
 
-`JSONAPI::Pagination` provides support for paginating model record sets as long
-as enumerables.
-
-Here's an example:
+Handles pagination with JSON:API compliant links:
 
 ```ruby
-class MyController < ActionController::Base
+class UsersController < ApplicationController
   include JSONAPI::Pagination
 
   def index
-    jsonapi_paginate(Model.all) do |paginated|
+    jsonapi_paginate(User.all) do |paginated|
       render jsonapi_paginate: paginated
     end
   end
 
+  private
+
+  def jsonapi_meta(resources)
+    {
+      pagination: jsonapi_pagination_meta(resources),
+      total: resources.respond_to?(:count) ? resources.count : resources.size
+    }
+  end
 end
 ```
 
-This will generate the relevant pagination _links_.
-
-If you want to add the pagination information to your meta,
-use the `jsonapi_pagination_meta` method:
-
-```ruby
-  def jsonapi_meta(resources)
-    pagination = jsonapi_pagination_meta(resources)
-
-    { pagination: pagination } if pagination.present?
-  end
-
+**Example requests:**
+```bash
+# Get page 2 with 20 items per page
+GET /users?page[number]=2&page[size]=20
 ```
 
-If you want to change the default number of items per page or define a custom logic to handle page size, use the
-`jsonapi_page_size` method:
+### JSONAPI::Fetching
+
+Supports sparse fieldsets and relationship inclusion:
 
 ```ruby
-  def jsonapi_page_size(pagination_params)
-    per_page = pagination_params[:size].to_f.to_i
-    per_page = 30 if per_page > 30
-    per_page
+class UsersController < ApplicationController
+  include JSONAPI::Fetching
+
+  def index
+    render jsonapi: User.all
   end
+
+  private
+
+  def jsonapi_include
+    # Whitelist allowed includes
+    super & [ "posts", "profile" ]
+  end
+end
 ```
-### Deserialization
 
-`JSONAPI::Deserialization` provides a helper to transform a `JSONAPI` document
-into a flat dictionary that can be used to update an `ActiveRecord::Base` model.
+**Example requests:**
+```bash
+# Include posts and only return specific fields
+GET /users?include=posts&fields[users]=first_name,last_name&fields[posts]=title
+```
 
-Here's an example using the `jsonapi_deserialize` helper:
+### Error Handling
 
 ```ruby
-class MyController < ActionController::Base
-  include JSONAPI::Deserialization
+class UsersController < ApplicationController
+  include JSONAPI::Errors
 
-  def update
-    model = MyModel.find(params[:id])
-
-    if model.update(jsonapi_deserialize(params, only: [:attr1, :rel_one]))
-      render jsonapi: model
+  def create
+    user = User.new(user_params)
+    
+    if user.save
+      render jsonapi: user, status: :created
     else
-      render jsonapi_errors: model.errors, status: :unprocessable_entity
+      render jsonapi_errors: user.errors, status: :unprocessable_entity
     end
   end
+
+  def update
+    user = User.find(params[:id])
+    
+    if user.update(user_params)
+      render jsonapi: user
+    else
+      render jsonapi_errors: user.errors, status: :unprocessable_entity
+    end
+  end
+
+  private
+
+  def user_params
+    params.require(:data).require(:attributes).permit(:first_name, :last_name, :email)
+  end
+
+  def render_jsonapi_internal_server_error(exception)
+    # Custom exception handling (e.g., error tracking)
+    # Sentry.capture_exception(exception)
+    super(exception)
+  end
 end
 ```
 
-The `jsonapi_deserialize` helper accepts the following options:
+## Advanced Configuration
 
- * `only`: returns exclusively attributes/relationship data in the provided list
- * `except`: returns exclusively attributes/relationship which are not in the list
- * `polymorphic`: will add and detect the `_type` attribute and class to the
-   defined list of polymorphic relationships
+### Custom Serializer Resolution
 
-This functionality requires support for _inflections_. If your project uses
-`active_support` or `rails` you don't need to do anything. Alternatively, we will
-try to load a lightweight alternative to `active_support/inflector` provided
-by the `dry/inflector` gem, please make sure it's added if you want to benefit
-from this feature.
+```ruby
+class UsersController < ApplicationController
+  def index
+    render jsonapi: User.all, serializer_class: CustomUserSerializer
+  end
 
-## Development
+  private
 
-After checking out the repo, run `bundle` to install dependencies.
+  def jsonapi_serializer_class(resource, is_collection)
+    JSONAPI::RailsApp.serializer_class(resource, is_collection)
+  rescue NameError
+    # Fallback serializer logic
+    "#{resource.class.name}Serializer".constantize
+  end
+end
+```
 
-Then, run `rake spec` to run the tests.
+### Custom Page Size
 
-To install this gem onto your local machine, run `bundle exec rake install`.
+```ruby
+def jsonapi_page_size(pagination_params)
+  per_page = pagination_params[:size].to_i
+  return 30 if per_page < 1 || per_page > 100
+  per_page
+end
+```
 
-To release a new version, update the version number in `version.rb`, and then
-run `bundle exec rake release`, which will create a git tag for the version,
-push git commits and tags, and push the `.gem` file to
-[rubygems.org](https://rubygems.org).
+### Serializer Parameters
+
+```ruby
+def jsonapi_serializer_params
+  {
+    current_user: current_user,
+    include_private: params[:include_private].present?
+  }
+end
+```
+
+## Configuration
+
+### Environment Variables
+
+- `PAGINATION_LIMIT` - Default page size (default: 30)
+
+### Dependencies
+
+This gem leverages these excellent libraries:
+- [Active Model Serializers](https://github.com/rails-api/active_model_serializers) - Object serialization
+- [Ransack](https://github.com/activerecord-hackery/ransack) - Advanced filtering and sorting
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at
-https://github.com/stas/jsonapi.rb
+Bug reports and pull requests are welcome on GitHub at https://github.com/stas/jsonapi.rb
 
-This project is intended to be a safe, welcoming space for collaboration, and
-contributors are expected to adhere to the
-[Contributor Covenant](http://contributor-covenant.org) code of conduct.
+This project follows the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
+
+## Development
+
+After checking out the repo:
+
+```bash
+bundle install
+bundle exec rspec  # Run tests
+bundle exec rubocop  # Check code style
+```
 
 ## License
 
-The gem is available as open source under the terms of the
-[MIT License](https://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

@@ -85,8 +85,8 @@ class Dummy < Rails::Application
 
   routes.draw do
     scope defaults: { format: :jsonapi } do
-      resources :users, only: [:index]
-      resources :notes, only: [:update]
+      resources :users, only: [ :index ]
+      resources :notes, only: [ :update ]
     end
   end
 end
