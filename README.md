@@ -12,7 +12,7 @@ JSONAPI.rb offers a collection of lightweight modules that integrate seamlessly 
 
 * **Object serialization** - Powered by Active Model Serializers
 * **Error handling** - JSON:API compliant [error responses](https://jsonapi.org/format/#errors) for parameters, validation, and generic errors
-* **Fetching** - Support for [includes](https://jsonapi.org/format/#fetching-includes) and [sparse fields](https://jsonapi.org/format/#fetching-sparse-fieldsets)
+* **Fetching** - Support for [includes](https://jsonapi.org/format/#fetching-includes)
 * **Filtering & Sorting** - Advanced [filtering](https://jsonapi.org/format/#fetching-filtering) and [sorting](https://jsonapi.org/format/#fetching-sorting) powered by Ransack
 * **Pagination** - Built-in [pagination](https://jsonapi.org/format/#fetching-pagination) support with links and metadata
 
@@ -166,7 +166,7 @@ GET /users?page[number]=2&page[size]=20
 
 ### JSONAPI::Fetching
 
-Supports sparse fieldsets and relationship inclusion:
+Supports relationship inclusion:
 
 ```ruby
 class UsersController < ApplicationController
@@ -187,8 +187,8 @@ end
 
 **Example requests:**
 ```bash
-# Include posts and only return specific fields
-GET /users?include=posts&fields[users]=first_name,last_name&fields[posts]=title
+# Include related posts
+GET /users?include=posts
 ```
 
 ### Error Handling
