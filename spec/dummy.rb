@@ -141,3 +141,40 @@ class UsersController < BaseApplicationController
     }
   end
 end
+
+class NotesController < ActionController::Base
+  include JSONAPI::Errors
+
+  def update
+    raise StandardError.new("tada") if params[:id] == 'tada'
+
+    note = Note.find(params[:id])
+
+    if note.update(note_params)
+      render jsonapi: note
+    else
+      note.errors.add(:title, message: 'has typos') if note.errors.key?(:title)
+
+      render jsonapi_errors: note.errors, status: :unprocessable_content
+    end
+  end
+
+  private
+
+    def jsonapi_serializer_class(resource, is_collection)
+      JSONAPI::RailsApp.serializer_class(resource, is_collection)
+    rescue NameError
+      klass = resource.class
+      klass = resource.first.class if is_collection
+      "Custom#{klass.name}Serializer".constantize
+    end
+
+    def note_params
+      # Will trigger required attribute error handling
+      params.require(:data).require(:attributes).require(:title)
+    end
+
+    def jsonapi_meta(resources)
+      { single: true }
+    end
+end

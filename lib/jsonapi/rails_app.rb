@@ -11,6 +11,13 @@ module JSONAPI
       params: :jsonapi_serializer_params
     }
 
+    JSONAPI_METHODS_MAPPING = {
+      meta: :jsonapi_meta,
+      fields: :jsonapi_fields,
+      include: :jsonapi_include,
+      params: :jsonapi_serializer_params
+    }
+
     # Updates the mime types and registers the renderers
     #
     # @return [NilClass]
@@ -21,6 +28,48 @@ module JSONAPI
       ActionDispatch::Request.parameter_parsers[:jsonapi] = parser
 
       self.add_renderer!
+      self.add_errors_renderer!
+    end
+
+
+    # Adds the error renderer
+    #
+    # @return [NilClass]
+    def self.add_errors_renderer!
+      ActionController::Renderers.add(:jsonapi_errors) do |resource, options|
+        self.content_type ||= Mime[:json]
+
+        many = JSONAPI::RailsApp.is_collection?(resource, options[:is_collection])
+        resource = [ resource ] unless many
+
+        return JSONAPI::ErrorSerializer.new(resource, options).to_json unless resource.is_a?(ActiveModel::Errors)
+
+        errors = []
+        model = resource.instance_variable_get("@base")
+
+        if options[:serializer_class]
+          model_serializer = options[:serializer_class]
+        else
+          model_serializer = JSONAPI::RailsApp.serializer_class(model, false)
+        end
+
+        details = {}
+        resource.map do |error|
+          attr = error.attribute
+          details[attr] ||= []
+          details[attr] << error.detail.merge(message: error.message)
+        end
+
+        details.each do |error_key, error_hashes|
+          error_hashes.each do |error_hash|
+            errors << [ error_key, error_hash ]
+          end
+        end
+
+        JSONAPI::ErrorSerializer.new(
+          errors, params: { model: model, model_serializer: model_serializer }
+        ).to_json
+      end
     end
 
     # Adds the default renderer
@@ -54,6 +103,30 @@ module JSONAPI
         data = ActiveModelSerializers::SerializableResource.new(resource, options).as_json
         result[:data] = data
         result.to_json
+      end
+
+      ActionController::Renderers.add(:jsonapi) do |resource, options|
+        self.content_type ||= Mime[:json]
+
+        JSONAPI_METHODS_MAPPING.to_a[0..0].each do |opt, method_name|
+          next unless respond_to?(method_name, true)
+          options[opt] ||= send(method_name, resource)
+        end
+
+        # If it's an empty collection, return it directly.
+        many = JSONAPI::RailsApp.is_collection?(resource, options[:is_collection])
+
+        JSONAPI_METHODS_MAPPING.to_a[1..-1].each do |opt, method_name|
+          options[opt] ||= send(method_name) if respond_to?(method_name, true)
+        end
+
+        if options[:serializer_class]
+          serializer_class = options[:serializer_class]
+        else
+          serializer_class = JSONAPI::RailsApp.serializer_class(resource, many)
+        end
+
+        serializer_class.new(resource, options).to_json
       end
     end
 
