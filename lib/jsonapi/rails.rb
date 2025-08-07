@@ -2,7 +2,7 @@ require 'ostruct'
 
 # Rails integration
 module JSONAPI
-  module Rails
+  module RailsApp
     JSONAPI_PAGINATE_METHODS_MAPPING = {
       meta: :jsonapi_meta,
       links: :jsonapi_pagination,
@@ -37,7 +37,7 @@ module JSONAPI
         end
 
         # If it's an empty collection, return it directly.
-        many = JSONAPI::Rails.is_collection?(resource, options[:is_collection])
+        many = JSONAPI::RailsApp.is_collection?(resource, options[:is_collection])
 
         JSONAPI_PAGINATE_METHODS_MAPPING.to_a[2..-1].each do |opt, method_name|
           options[opt] ||= send(method_name) if respond_to?(method_name, true)
@@ -46,7 +46,7 @@ module JSONAPI
         if options[:serializer_class]
           serializer_class = options[:serializer_class]
         else
-          serializer_class = JSONAPI::Rails.serializer_class(resource, many)
+          serializer_class = JSONAPI::RailsApp.serializer_class(resource, many)
         end
 
         options[:adapter] = :attributes

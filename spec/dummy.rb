@@ -8,7 +8,7 @@ require 'active_model_serializers'
 Rails.logger = Logger.new(STDOUT)
 Rails.logger.level = ENV['LOG_LEVEL'] || Logger::WARN
 
-JSONAPI::Rails.install!
+JSONAPI::RailsApp.install!
 
 ActiveRecord::Base.logger = Rails.logger
 ActiveRecord::Base.establish_connection(

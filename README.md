@@ -51,6 +51,10 @@ Thanks to everyone who worked on these amazing projects!
 
 ## Installation
 
+**Requirements:**
+- Ruby 3.3.0 or higher
+- Rails 8.0 or higher
+
 Add this line to your application's Gemfile:
 
 ```ruby
@@ -84,7 +88,7 @@ To enable the support for Rails, add this to an initializer:
 # config/initializers/jsonapi.rb
 require 'jsonapi'
 
-JSONAPI::Rails.install!
+JSONAPI::RailsApp.install!
 ```
 
 This will register the mime type and the `jsonapi` and `jsonapi_errors`
@@ -125,7 +129,7 @@ class CustomNamingController < ActionController::Base
   private
 
   def jsonapi_serializer_class(resource, is_collection)
-    JSONAPI::Rails.serializer_class(resource, is_collection)
+    JSONAPI::RailsApp.serializer_class(resource, is_collection)
   rescue NameError
     # your serializer class naming implementation
   end

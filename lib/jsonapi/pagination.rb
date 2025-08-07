@@ -75,7 +75,7 @@ module JSONAPI
     # total_count, total_page numbers
     def jsonapi_pagination_builder(resources)
       return @_numbers if @_numbers
-      return {} unless JSONAPI::Rails.is_collection?(resources)
+      return {} unless JSONAPI::RailsApp.is_collection?(resources)
 
       _, limit, page = jsonapi_pagination_params
 
