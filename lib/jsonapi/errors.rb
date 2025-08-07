@@ -36,7 +36,7 @@ module JSONAPI
       def render_jsonapi_internal_server_error(exception)
         error = {
           status: "500",
-          key: "internal_server_error",
+          code: "internal_server_error",
           title: Rack::Utils::HTTP_STATUS_CODES[500],
           detail: exception.message
         }
@@ -50,7 +50,7 @@ module JSONAPI
       def render_jsonapi_not_found(exception)
         error = {
           status: "404",
-          key: "not_found",
+          code: "not_found",
           title: Rack::Utils::HTTP_STATUS_CODES[404],
           detail: "Resource not found"
         }
@@ -64,7 +64,7 @@ module JSONAPI
       def render_jsonapi_unprocessable_entity(exception)
         error = {
           status: "422",
-          key: "unprocessable_entity",
+          code: "unprocessable_entity",
           title: Rack::Utils::HTTP_STATUS_CODES[422],
           detail: "Required parameter missing or invalid"
         }

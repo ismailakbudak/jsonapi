@@ -49,7 +49,7 @@ RSpec.describe NotesController, type: :request do
         expect(response).to have_http_status(:unprocessable_content)
         expect(response_json["errors"].size).to eq(1)
         expect(response_json["errors"][0]["status"]).to eq("422")
-        expect(response_json["errors"][0]["key"]).to include("blank")
+        expect(response_json["errors"][0]["code"]).to include("blank")
         expect(response_json["errors"][0]["title"]).to eq('Error')
         expect(response_json["errors"][0]["detail"]).to eq("User must exist")
         expect(response_json["errors"][0]["attribute"]).to eq("user")
@@ -68,17 +68,17 @@ RSpec.describe NotesController, type: :request do
           expect(response_json["errors"].size).to eq(3)
 
           expect(response_json["errors"][0]["status"]).to eq("422")
-          expect(response_json["errors"][0]["key"]).to include("invalid")
+          expect(response_json["errors"][0]["code"]).to include("invalid")
           expect(response_json["errors"][0]["title"]).to eq('Error')
           expect(response_json["errors"][0]["detail"]).to eq("Title is invalid")
 
           expect(response_json["errors"][1]["status"]).to eq("422")
-          expect(response_json["errors"][1]["key"]).to eq("less_than")
+          expect(response_json["errors"][1]["code"]).to eq("less_than")
           expect(response_json["errors"][1]["title"]).to eq('Error')
           expect(response_json["errors"][1]["detail"]).to eq("Quantity must be less than 100")
 
           expect(response_json["errors"][2]["status"]).to eq("422")
-          expect(response_json["errors"][2]["key"]).to eq("invalid")
+          expect(response_json["errors"][2]["code"]).to eq("invalid")
           expect(response_json["errors"][2]["title"]).to eq('Error')
           expect(response_json["errors"][2]["detail"]).to eq("Title has typos")
         end

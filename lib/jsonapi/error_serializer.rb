@@ -61,7 +61,7 @@ module JSONAPI
     def serialize_validation_error(attribute, error)
       {
         status: error[:status] || "422",
-        key: error[:key] || "invalid",
+        code: error[:code] || "invalid",
         title: error[:title] || "Error",
         detail: error[:message],
         attribute: attribute
@@ -75,7 +75,7 @@ module JSONAPI
     def serialize_hash_error(error)
       {
         status: error[:status] || "422",
-        key: error[:key] || "invalid",
+        code: error[:code] || "invalid",
         title: error[:title] || "Error",
         detail: error[:detail] || error["detail"]
       }.compact
@@ -88,7 +88,7 @@ module JSONAPI
     def serialize_generic_error(error)
       {
         status: "422",
-        key: error.type,
+        code: error.type,
         title: "Error",
         detail: error.full_message,
         attribute: error.attribute
