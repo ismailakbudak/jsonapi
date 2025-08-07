@@ -66,7 +66,7 @@ module JSONAPI
           status: "422",
           key: "unprocessable_entity",
           title: Rack::Utils::HTTP_STATUS_CODES[422],
-          detail: "Required parameter missing or invalid",
+          detail: "Required parameter missing or invalid"
         }
 
         render jsonapi_errors: [ error ], status: :unprocessable_content

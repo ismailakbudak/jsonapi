@@ -10,7 +10,7 @@ RSpec.describe NotesController, type: :request do
       {
         note: {
           title: FFaker::Company.name,
-          user_id: user_id,
+          user_id: user_id
         }
       }
     end
