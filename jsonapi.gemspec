@@ -22,9 +22,9 @@ Gem::Specification.new do |spec|
   spec.files        += %w[LICENSE.txt README.md]
   spec.require_paths = [ 'lib' ]
 
-  spec.add_dependency 'ransack', '~> 4.2'
-  spec.add_dependency 'rack', '~> 3.1'
-  spec.add_dependency 'active_model_serializers', '~> 0.10.14'
+  spec.add_dependency 'ransack'
+  spec.add_dependency 'rack'
+  spec.add_dependency 'active_model_serializers'
 
   spec.add_development_dependency 'bundler', '~> 2.5'
   spec.add_development_dependency 'rails', '~> 8.0'
