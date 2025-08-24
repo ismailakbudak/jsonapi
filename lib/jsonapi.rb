@@ -1,6 +1,6 @@
 require "jsonapi/errors"
 require "jsonapi/error_serializer"
-# require 'jsonapi/fetching'
+require 'jsonapi/fetching'
 require "jsonapi/filtering"
 require "jsonapi/pagination"
 require "jsonapi/rails_app"

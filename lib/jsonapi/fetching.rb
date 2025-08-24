@@ -2,25 +2,22 @@ module JSONAPI
   # Inclusion and sparse fields support
   module Fetching
     private
-      # Extracts and formats sparse fieldsets
+      # Extracts and formats sparse fieldsets for Active Model Serializers
       #
       # Ex.: `GET /resource?fields[relationship]=id,created_at`
       #
-      # @return [Hash]
+      # @return [Hash] in Active Model Serializers format
       def jsonapi_fields
         return unless params[:fields].respond_to?(:each_pair)
 
-        if defined?(ActiveSupport::HashWithIndifferentAccess)
-          extracted = ActiveSupport::HashWithIndifferentAccess.new
-        else
-          extracted = Hash.new
-        end
-
+        result = []
+        
         params[:fields].each do |k, v|
-          extracted[k] = v.to_s.split(",").map(&:strip).compact
+          field_names = v.to_s.split(",").map(&:strip).compact.map(&:to_sym)
+          result << { k.to_sym => field_names }
         end
 
-        extracted
+        result
       end
 
       # Extracts and whitelists allowed includes

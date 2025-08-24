@@ -85,7 +85,7 @@ class Dummy < Rails::Application
 
   routes.draw do
     scope defaults: { format: :jsonapi } do
-      resources :users, only: [ :index ]
+      resources :users, only: [ :index, :show ]
       resources :notes, only: [ :update ]
     end
   end
@@ -99,7 +99,7 @@ class BaseApplicationController < ActionController::Base
 end
 
 class UsersController < BaseApplicationController
-  # include JSONAPI::Fetching
+  include JSONAPI::Fetching
   include JSONAPI::Filtering
   include JSONAPI::Pagination
 
@@ -127,6 +127,11 @@ class UsersController < BaseApplicationController
     end
   end
 
+  def show
+    render jsonapi: User.find(params[:id]),
+           serializer_class: MyUserSerializer
+  end
+
   private
   def jsonapi_meta(resources)
     {
@@ -143,6 +148,7 @@ class UsersController < BaseApplicationController
 end
 
 class NotesController < ActionController::Base
+  include JSONAPI::Fetching
   include JSONAPI::Errors
 
   def update
