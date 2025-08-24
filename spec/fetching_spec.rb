@@ -90,7 +90,21 @@ RSpec.describe UsersController, type: :request do
         end
       end
 
-      context 'returns customers first name' do
+      context 'returns customers first name and notes id' do
+        let(:params) do
+          {
+            include: 'notes',
+            fields: { user: 'first_name', note: 'id' }
+          }
+        end
+
+        it do
+          expect(response).to have_http_status(:ok)
+          expect(response_json['data']).to eq({ "first_name" => user.first_name, "notes" => [{ "id" => note.id }] })
+        end
+      end
+
+      context 'returns customers first name and notes id' do
         let(:params) do
           { fields: { user: 'first_name' } }
         end
