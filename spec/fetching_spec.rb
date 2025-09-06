@@ -104,6 +104,23 @@ RSpec.describe UsersController, type: :request do
         end
       end
 
+      context 'returns user attributes with and notes id' do
+        let(:params) do
+          {
+            include: 'notes',
+            fields: { note: 'id' }
+          }
+        end
+
+        it do
+          expect(response).to have_http_status(:ok)
+          expect(response_json.dig('data', 'id')).to eq(user.id)
+          expect(response_json.dig('data', 'first_name')).to eq(user.first_name)
+          expect(response_json.dig('data', 'last_name')).to eq(user.last_name)
+          expect(response_json.dig('data', 'notes', 0, 'id')).to eq(note.id)
+        end
+      end
+
       context 'returns customers first name and notes id' do
         let(:params) do
           { fields: { user: 'first_name' } }
@@ -125,7 +142,7 @@ RSpec.describe UsersController, type: :request do
 
         it 'should render notes with user' do
           expect(response).to have_http_status(:ok)
-          expect(response_json['data'].keys.size).to eql(1)
+          expect(response_json['data'].keys.size).to eql(7)
           expect(response_json['data']['notes'].size).to eql(1)
           expect(response_json['data']['notes'][0]).to eql({
             'title' => note.title,

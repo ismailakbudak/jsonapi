@@ -72,7 +72,7 @@ module JSONAPI
           serializer_class = JSONAPI::RailsApp.serializer_class(resource, many)
         end
 
-        options[:fields] = jsonapi_fields
+        options[:fields] = jsonapi_fields(serializer_class, JSONAPI::RailsApp.fetch_name(many, resource))
         options[:adapter] = :attributes
         options[:each_serializer] = serializer_class
         data = ActiveModelSerializers::SerializableResource.new(resource, options).as_json
@@ -103,7 +103,7 @@ module JSONAPI
         end
 
         # Use Active Model Serializers properly with fallback
-        options[:fields] = jsonapi_fields
+        options[:fields] = jsonapi_fields(serializer_class, JSONAPI::RailsApp.fetch_name(many, resource))
         options[:adapter] = :attributes
         options[:each_serializer] = serializer_class
         if many
@@ -137,6 +137,18 @@ module JSONAPI
       klass = resource.first.class if is_collection
 
       "#{klass.name}Serializer".constantize
+    end
+
+    def self.fetch_name(many, resource)
+      if many
+        if resource.is_a?(ActiveRecord::Relation)
+          resource&.model_name&.singular
+        else
+          resource.first&.model_name&.singular
+        end
+      else
+        resource&.model_name&.singular
+      end
     end
   end
 end
