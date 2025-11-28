@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/stas/jsonapi.rb'
   spec.license       = 'MIT'
 
-  spec.required_ruby_version = '>= 3.3.0'
+  spec.required_ruby_version = '>= 3.2.0'
 
   spec.files         = Dir.glob('{lib,spec}/**/*', File::FNM_DOTMATCH)
   spec.files        += %w[LICENSE.txt README.md]
