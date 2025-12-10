@@ -92,6 +92,7 @@ module JSONAPI
         # do nothing for this condition
       elsif resources.respond_to?(:unscope)
         total = resources.unscope(:limit, :offset, :order).size
+        total = total.size if total.is_a?(Hash)
       else
         # Try to fetch the cached size first
         total = resources.instance_variable_get(:@original_size)
